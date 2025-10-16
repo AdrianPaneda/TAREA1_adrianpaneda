@@ -26,6 +26,7 @@ public class Herramientas {
         return matcher.matches();
     
     }
+    
     /**
      * Metodo para verificar que se introduce un nombre valido
      * @param nombre
@@ -37,5 +38,19 @@ public class Herramientas {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(nombre);
         return matcher.matches();
+    }
+    
+    /**
+     * Metodo para verificar nombre de usuario
+     * @param usuario
+     * @return      */
+    public static boolean verificarNombreusuario(String usuario){
+    
+    
+    
+    
+    
+    
+    return false;
     }
 }

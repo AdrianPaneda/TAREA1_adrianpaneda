@@ -6,19 +6,18 @@
 */
 package principal;
 import entidades.*;
-
-import java.util.InputMismatchException;
 import java.util.Scanner;
 import herramientas.Herramientas;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.InputMismatchException;
+import java.util.Map;
+import java.util.TreeMap;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -30,66 +29,51 @@ public class CircoMainClass {
         
         /**
          * Metodo para recorrer nodos del xml paises
-         * @param Nodelist nodos
-         * @return List<String>
+         * @param nodos
+         * @return Map<Integer,String>
          */
-        private static List<String> leerNodos(NodeList nodos){
+        public static Map<String,String> leerNodos(NodeList nodos){
         
-          List<String> paises = new ArrayList<>();
-          Node nodo;
+           Map<String,String> paises = new TreeMap<>();
+           Node nodo;
             for (int i = 0; i < nodos.getLength(); i++) {
                 
                 //Asigno a la variable nodo el nodo pais
                 nodo = nodos.item(i);
                 NodeList nodosPais = nodo.getChildNodes();
                 //Recorro todos los nodos pais
-                for (int j = 0; j < nodosPais.getLength(); j++) {
-                    //En cada pais busco el nodo con el nombre y lo añado a la lista
-                    if(nodosPais.item(j).getNodeName().equals("nombre")){
-                        
-                     paises.add(nodosPais.item(j).getNodeValue());
-                    
-                    }
-                }
-    
-            }
-          
-        return paises;
-        
-        
+                paises.put(nodosPais.item(0).getTextContent(), nodosPais.item(1).getTextContent());
+            }        
+          return paises;
         }
         
         /**
          * Metodo para encontrar pais en xml con DOM 
-         * @param pais
+         * @param idPais
          * @param fichero
          * @return boolean
          */
-        public static boolean encontrarPais(String pais, File fichero){
+        public static boolean encontrarPais(String idPais, File fichero){
             
             boolean encontrado = false;
             
             try{
                 
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setIgnoringComments(true);
-            factory.setIgnoringElementContentWhitespace(true);
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc=builder.parse(fichero);
-            Node raiz = doc.getFirstChild();
-            NodeList paises = raiz.getChildNodes();
-            List<String> listaPaises = leerNodos(paises);
-            for(String a: listaPaises){
-            
-                if(a.equals(pais)){ 
-                   encontrado = true;
-                   break;
-                }       
-            
-            }
-            
-             return encontrado;
-            
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                factory.setIgnoringComments(true);
+                factory.setIgnoringElementContentWhitespace(true);
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                Document doc=builder.parse(fichero);
+                Node raiz = doc.getFirstChild();
+                NodeList paises = raiz.getChildNodes();
+                Map<String,String> listaPaises= leerNodos(paises);
+                
+                for (Map.Entry<String, String> entry : listaPaises.entrySet()) {
+                if(entry.getKey().equals(idPais)){               
+                encontrado = true;
+                }          
+                }
+                 return encontrado;
             }
             catch(IOException e){
                 System.out.println("Error al leer el archivo(compruebe que existe): "+e.getMessage());
@@ -100,66 +84,116 @@ public class CircoMainClass {
             catch(ParserConfigurationException e){
                 System.out.println("Error al crear el parser: "+e.getMessage());
             }
-            
-            
-        
-        
-        
-        
        return encontrado;
-
+        }
+        	
+        /**
+         * Metodo para listar paises
+         * @param fichero 
+         */
+        public static void listarPaises(File fichero){
+                System.out.println("**Listado de paises**");
+                 try{
+                
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                factory.setIgnoringComments(true);
+                factory.setIgnoringElementContentWhitespace(true);
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                Document doc = builder.parse(fichero);
+                Element raiz = doc.getDocumentElement();
+                NodeList paises = raiz.getElementsByTagName("pais");
+                
+               
+                Map<String,String> listaPaises= leerNodos(paises);
+                
+                for (Map.Entry<String, String> entry : listaPaises.entrySet()) {
+                    System.out.println(entry.getKey()+"-"+entry.getValue());    
+                }   
+            }
+            catch(IOException e){
+                System.out.println("Error al leer el archivo(compruebe que existe): "+e.getMessage());
+            }
+            catch(SAXException e){
+                System.out.println("Error, el archivo XML no esta bien formado: "+e.getMessage());
+            }
+            catch(ParserConfigurationException e){
+                System.out.println("Error al crear el parser: "+e.getMessage());
+            }
+ 
         }
         
-	
+        /**
+         * Metodo para registrar persona
+         * @param
+         */
         public static void registrarPersona(){
             
-            String verificar="";
+            boolean verificar=false;
             do{
-            System.out.println("Bienvenido al sistema de registro");
-            System.out.println("===========================================");
-            System.out.println("/n Datos personales");
+                System.out.println("Bienvenido al sistema de registro");
+                System.out.println("===========================================");
+                System.out.println("/n ---Datos personales---");
+
+                //email
+                String email;
+                boolean verificarEmail;
+                //Verificar email
+                do{
+                    System.out.print("Introduzca el email a continuacion:");
+                    email=leer.nextLine();
+                    verificarEmail = Herramientas.verificarEmail(email);
+
+                    if(!verificarEmail){System.out.println("\s Lo siento, email no valido, intentelo de nuevo");}
+
+                }while(!verificarEmail);
+
+                //Nombre
+                String nombre;
+                boolean verificarNombre;
+                 do{
+                    System.out.print("Introduzca el nombre a continuacion:");
+                    nombre=leer.nextLine();
+                    verificarNombre = Herramientas.verificarNombre(nombre);
+
+                    if(!verificarNombre){System.out.println("\s Lo siento, nombre no valido, intentelo de nuevo");}
+
+                }while(!verificarNombre);
+
+                //Nacionalidad
+                String nacionalidad="S";
+                boolean verificarNacionalidad=false;
+                File fichero = new File("src\\main\\java\\resources\\paises.xml");
+                listarPaises(fichero);
+                System.out.println("");
+                boolean idCorrecto=true;
+                do{
+                  System.out.print("Introduzca el id del país de nacionalidad a continuacion:");
+                  try{
+                  nacionalidad=leer.nextLine();
+                  }catch(InputMismatchException e){
+                      System.out.println("Introduzca un id valido por favor;");
+                      idCorrecto=false;
+                  }
+                  if(idCorrecto){
+                  verificarNacionalidad = encontrarPais(nacionalidad,fichero);
+                  if(!verificarNacionalidad){System.out.println("\s Lo siento, paíd no registrado, intentelo de nuevo");}
+                }
+                }while(!verificarNacionalidad);
+
+                //Credenciales
+                 System.out.println("--Credenciales--");
+                //Nombre de usuario
+                boolean verificarusuario=false;
+                do {                    
+                    System.out.print("Introduzca el nombre de usuario a continuacion:"); 
+                    
+                } while (verificarusuario);
+               
+                 
             
-            //email
-            String email;
-            boolean verificarEmail;
-            //Verificar email
-            do{
-                System.out.print("Introduzca el email a continuacion:");
-                email=leer.nextLine();
-                verificarEmail = Herramientas.verificarEmail(email);
-                
-                if(!verificarEmail){System.out.println("\s Lo siento, email no valido, intentelo de nuevo");}
-                
-            }while(!verificarEmail);
             
-            //Nombre
-            String nombre;
-            boolean verificarNombre;
-             do{
-                System.out.print("Introduzca el nombre a continuacion:");
-                nombre=leer.nextLine();
-                verificarNombre = Herramientas.verificarNombre(nombre);
-                
-                if(!verificarNombre){System.out.println("\s Lo siento, nombre no valido, intentelo de nuevo");}
-                
-            }while(!verificarNombre);
-            
-            //Nacionalidad
-            String nacionalidad;
-            boolean verificarNacionalidad=false;
-            File fichero = new File("resources/paises.xml");
-            
-            do{
-              System.out.print("Introduzca la nacionalidad a continuacion:");
-              nacionalidad=leer.nextLine(); 
-              verificarNacionalidad = encontrarPais(nacionalidad,fichero);
-              if(!verificarNacionalidad){System.out.println("\s Lo siento, paíd no registrado, intentelo de nuevo");}
-                
-            
-            
-            }while(!verificarNacionalidad);
      
-            }while(!verificar.equals("si"));
+            }while(!verificar);
         
         }
 	
