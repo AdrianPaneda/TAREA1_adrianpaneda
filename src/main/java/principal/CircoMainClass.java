@@ -36,16 +36,20 @@ public class CircoMainClass {
         
            Map<String,String> paises = new TreeMap<>();
            Node nodo;
-            for (int i = 0; i < nodos.getLength(); i++) {
-                
-                //Asigno a la variable nodo el nodo pais
-                nodo = nodos.item(i);
-                NodeList nodosPais = nodo.getChildNodes();
-                //Recorro todos los nodos pais
-                paises.put(nodosPais.item(0).getTextContent(), nodosPais.item(1).getTextContent());
+            for (int i = 0; i < nodos.getLength(); i++) {  
+                nodo = nodos.item(i);             
+                //Compruebo que el nodo es pais y añado al Map
+                if(nodo.getNodeName().equals("pais")){
+                Element pais = (Element) nodo;
+                String id = pais.getElementsByTagName("id").item(0).getTextContent();
+                String nombre = pais.getElementsByTagName("nombre").item(0).getTextContent();
+                paises.put(id, nombre);               
+                }
+                }
+            return paises;
             }        
-          return paises;
-        }
+         
+       
         
         /**
          * Metodo para encontrar pais en xml con DOM 
@@ -100,8 +104,9 @@ public class CircoMainClass {
                 factory.setIgnoringElementContentWhitespace(true);
                 DocumentBuilder builder = factory.newDocumentBuilder();
                 Document doc = builder.parse(fichero);
-                Element raiz = doc.getDocumentElement();
-                NodeList paises = raiz.getElementsByTagName("pais");
+                Node raiz = doc.getFirstChild();
+                System.out.println(raiz.getNodeName());
+                NodeList paises = raiz.getChildNodes();
                 
                
                 Map<String,String> listaPaises= leerNodos(paises);
