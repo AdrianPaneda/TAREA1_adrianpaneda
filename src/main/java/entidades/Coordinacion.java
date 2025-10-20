@@ -19,12 +19,15 @@ public class Coordinacion extends Persona {
     private LocalDate fechasenior = null;
     private Set<Espectaculo> espectaculos = new LinkedHashSet<>();
 
-    public Coordinacion(Long idCoord, Long id, String email, String nombre, String nacionalidad, Credenciales credenciales) {
-        super(id, email, nombre, nacionalidad, credenciales);
-        this.idCoord = idCoord;
-    }
+    public Coordinacion(String email, String nombre, String nacionalidad, Credenciales credenciales,
+			boolean senior, LocalDate fechasenior) {
+		super(email, nombre, nacionalidad, credenciales);
+		this.senior = senior;
+		this.fechasenior = fechasenior;
+		
+	}
 
-    public Long getIdCoord() {
+	public Long getIdCoord() {
         return idCoord;
     }
 
@@ -55,14 +58,5 @@ public class Coordinacion extends Persona {
     public void setEspectaculos(Set<Espectaculo> espectaculos) {
         this.espectaculos = espectaculos;
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+   
 }

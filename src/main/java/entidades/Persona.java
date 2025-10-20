@@ -16,7 +16,7 @@ public class Persona {
     private String nacionalidad;
     private Credenciales credenciales;
 
-    public Persona(Long id, String email, String nombre, String nacionalidad, Credenciales credenciales) {
+    public Persona(String email, String nombre, String nacionalidad, Credenciales credenciales) {
         this.id = credenciales.getId();
         this.email = email;
         this.nombre = nombre;

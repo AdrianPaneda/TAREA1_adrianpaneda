@@ -15,14 +15,18 @@ public class Artista extends Persona {
     
     private Long idArt;
     private String apodo = null;
-    private Set<Especialidades> especialidad = new HashSet<>();
+    private Set<Especialidades> especialidades = new HashSet<>();
     private Set<Numero> numeros = new HashSet<>();
 
-    public Artista(Long id, String email, String nombre, String nacionalidad, Credenciales credenciales) {
-        super(id, email, nombre, nacionalidad, credenciales);
-    }
+    
 
-    public Long getIdArt() {
+    public Artista(String email, String nombre, String nacionalidad, Credenciales credenciales,
+			String apodo) {
+		super(email, nombre, nacionalidad, credenciales);
+		this.apodo = apodo;
+	}
+
+	public Long getIdArt() {
         return idArt;
     }
 
@@ -39,11 +43,11 @@ public class Artista extends Persona {
     }
 
     public Set<Especialidades> getEspecialidad() {
-        return especialidad;
+        return especialidades;
     }
 
     public void setEspecialidad(Set<Especialidades> especialidad) {
-        this.especialidad = especialidad;
+        this.especialidades = especialidad;
     }
 
     public Set<Numero> getNumeros() {

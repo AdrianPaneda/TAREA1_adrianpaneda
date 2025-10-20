@@ -15,8 +15,7 @@ public class Credenciales {
     private String password;
     private Perfiles perfil;
 
-    public Credenciales(Long id, String nombre, String password, Perfiles perfil) {
-        this.id = id;
+    public Credenciales( String nombre, String password, Perfiles perfil) {
         this.nombre = nombre;
         this.password = password;
         this.perfil = perfil;

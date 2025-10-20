@@ -8,9 +8,21 @@ package principal;
 import entidades.*;
 import java.util.Scanner;
 import herramientas.Herramientas;
+import herramientas.PropertiesClass;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.xml.parsers.DocumentBuilder;
@@ -21,6 +33,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+
 
 public class CircoMainClass {
 	
@@ -48,8 +62,6 @@ public class CircoMainClass {
                 }
             return paises;
             }        
-         
-       
         
         /**
          * Metodo para encontrar pais en xml con DOM 
@@ -95,8 +107,9 @@ public class CircoMainClass {
          * Metodo para listar paises
          * @param fichero 
          */
-        public static void listarPaises(File fichero){
+        public static Map<String,String> listarPaises(File fichero){
                 System.out.println("**Listado de paises**");
+                Map<String,String> listaPaises = new TreeMap<>();
                  try{
                 
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -109,7 +122,7 @@ public class CircoMainClass {
                 NodeList paises = raiz.getChildNodes();
                 
                
-                Map<String,String> listaPaises= leerNodos(paises);
+                listaPaises= leerNodos(paises);
                 
                 for (Map.Entry<String, String> entry : listaPaises.entrySet()) {
                     System.out.println(entry.getKey()+"-"+entry.getValue());    
@@ -124,7 +137,11 @@ public class CircoMainClass {
             catch(ParserConfigurationException e){
                 System.out.println("Error al crear el parser: "+e.getMessage());
             }
+                 return listaPaises;
  
+        }
+        public static void escribirPersona() {
+   	
         }
         
         /**
@@ -133,77 +150,219 @@ public class CircoMainClass {
          */
         public static void registrarPersona(){
             
-            boolean verificar=false;
-            do{
-                System.out.println("Bienvenido al sistema de registro");
+                System.out.println("Bienvenido al sistema de registro 👤");
                 System.out.println("===========================================");
-                System.out.println("/n ---Datos personales---");
-
+                System.out.println("---Datos personales---");
+                boolean verificar=false;
+                String respuesta;
+                Persona persona;
                 //email
                 String email;
-                boolean verificarEmail;
                 //Verificar email
                 do{
                     System.out.print("Introduzca el email a continuacion:");
                     email=leer.nextLine();
-                    verificarEmail = Herramientas.verificarEmail(email);
-
-                    if(!verificarEmail){System.out.println("\s Lo siento, email no valido, intentelo de nuevo");}
-
-                }while(!verificarEmail);
+                    verificar = Herramientas.verificarEmail(email);
+                    if(!verificar){System.out.println("\t Lo siento, email no valido, intentelo de nuevo");}
+                }while(!verificar);
 
                 //Nombre
                 String nombre;
-                boolean verificarNombre;
                  do{
                     System.out.print("Introduzca el nombre a continuacion:");
                     nombre=leer.nextLine();
-                    verificarNombre = Herramientas.verificarNombre(nombre);
+                    verificar = Herramientas.verificarNombre(nombre);
 
-                    if(!verificarNombre){System.out.println("\s Lo siento, nombre no valido, intentelo de nuevo");}
+                    if(!verificar){System.out.println("\t Lo siento, nombre no valido.Solo se admiten letras, intentelo de nuevo");}
 
-                }while(!verificarNombre);
+                }while(!verificar);
 
                 //Nacionalidad
-                String nacionalidad="S";
-                boolean verificarNacionalidad=false;
-                File fichero = new File("src\\main\\java\\resources\\paises.xml");
-                listarPaises(fichero);
-                System.out.println("");
-                boolean idCorrecto=true;
+                String idNacionalidad;
+                String nacionalidad="";
+                File fichero = new File(PropertiesClass.obtenerPropiedad("paises"));
+                Map<String,String>paises = listarPaises(fichero);
+                System.out.println("");   
                 do{
                   System.out.print("Introduzca el id del país de nacionalidad a continuacion:");
-                  try{
-                  nacionalidad=leer.nextLine();
-                  }catch(InputMismatchException e){
-                      System.out.println("Introduzca un id valido por favor;");
-                      idCorrecto=false;
-                  }
-                  if(idCorrecto){
-                  verificarNacionalidad = encontrarPais(nacionalidad,fichero);
-                  if(!verificarNacionalidad){System.out.println("\s Lo siento, paíd no registrado, intentelo de nuevo");}
-                }
-                }while(!verificarNacionalidad);
+                  idNacionalidad=leer.nextLine().toUpperCase(); 
+                  verificar = encontrarPais(idNacionalidad,fichero);
+                  if(!verificar){System.out.println("\t Error, país no registrado, intentelo de nuevo");}
+                  else {    		
+                		 nacionalidad = paises.get(idNacionalidad);
+                  }   
+                }while(!verificar);
 
                 //Credenciales
                  System.out.println("--Credenciales--");
                 //Nombre de usuario
-                boolean verificarusuario=false;
+                String nombreUsuario;
                 do {                    
-                    System.out.print("Introduzca el nombre de usuario a continuacion:"); 
-                    
-                } while (verificarusuario);
-               
-                 
-            
-            
-     
-            }while(!verificar);
-        
+                    System.out.print("Introduzca el nombre de usuario a continuacion:");
+                    nombreUsuario = leer.nextLine();
+                    verificar = Herramientas.verificarNombreusuario(nombreUsuario);
+                    if(!verificar) {System.out.println("\t Error, nombre de usuario no valido, intentelo de nuevo");}
+   
+                } while (!verificar);
+               // Contraseña
+                String password;
+                do {                    
+                    System.out.print("Introduzca la contraseña continuacion:");
+                    password = leer.nextLine();
+                    verificar = Herramientas.verificarContrasena(password);
+                    if(!verificar) {System.out.println("\t Contraseña no válida(Minimo 3 caracteres sin espacios en blanco), intentelo de nuevo");}
+   
+                } while (!verificar); 
+                
+                //AsignarPerfil
+                //Perfiles perfil = asignarPerfil();
+                boolean perfilValido=false;
+                String perfilConsola;
+                String apodo=null;
+                Especialidades especialidad;
+                LocalDate fechaSenior=null;
+                Perfiles perfil= null;
+                List<String> especialidades = new ArrayList<>();
+                do {
+                    System.out.print("Introduzca el perfil de la persona (Coordinacion/Artista) a continuacion: ");    
+                    perfilConsola = leer.nextLine().toLowerCase();
+                    if(perfilConsola.equalsIgnoreCase(Perfiles.coordinacion.name())) {
+                        perfil = Perfiles.coordinacion;
+                        perfilValido=true;
+                        boolean senior=false;
+                        do {
+                        System.out.println("Es senior? (s/n)");
+                        respuesta=leer.nextLine();
+                        verificar = Herramientas.confirmarRechazar(respuesta);
+                        if(!verificar) {
+                            System.out.println("\t Respuesta no valida, intentelo de nuevo");
+                        } else { 
+                            if(respuesta.equalsIgnoreCase("s")) {
+                             senior=true;
+                          	  String fecha;
+                          	  DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");  
+                          	  while(fechaSenior == null) {
+                          		  
+                          		  System.out.print("Introduzca desde que fecha (dd/MM/yyyy): ");
+                          		  fecha = leer.nextLine();                      		 
+                          		  try {
+                          		  fechaSenior = LocalDate.parse(fecha, formato);
+                          		  }
+                                            catch(DateTimeParseException e){
+                          			  
+                          			  System.out.println("\\t Fecha no válida,intentelo de nuevo");	                        			  
+                          		  }	  
+                          	  }		
+                            }    
+                        } 	
+                        }while(!verificar);
+                        Credenciales credenciales = new Credenciales(nombreUsuario,password,perfil);
+                        Coordinacion coordinador = new Coordinacion(email,nombre,idNacionalidad,credenciales,senior,fechaSenior);
+                        persona = coordinador;
+                  
+                    } else if(perfilConsola.equalsIgnoreCase(Perfiles.artista.name())) {
+                        perfil = Perfiles.artista;
+                        perfilValido=true;
+                        do {
+                            System.out.println("Tiene apodo? (s/n)");
+                            respuesta = leer.nextLine();
+                            verificar = Herramientas.confirmarRechazar(respuesta);
+                            if(!verificar) {
+                                System.out.println("\\t Respuesta no valida, intentelo de nuevo");
+                            } else { 
+                                if(respuesta.equalsIgnoreCase("s")) {
+                                    System.out.println("Introduzca el apodo a continuacion por favor");
+                                    apodo = leer.nextLine();
+                                }    
+                            }
+                        } while(!verificar);                                             
+                        Credenciales credenciales = new Credenciales(nombreUsuario,password,perfil);
+                        Artista artista = new Artista(email,nombre,idNacionalidad,credenciales,apodo);
+                        persona = artista;
+                        //Especialidades
+                        int especialidadNum;
+                        boolean encontrado;
+                        System.out.println("--Especialidades--");
+                        for (int i = 0; i < Especialidades.values().length; i++) {
+                            System.out.println((i+1)+"-"+Especialidades.values()[i]);    
+                        }
+                        System.out.println("--Instrucciones--");
+                        System.out.println("-Puede introducir cuantas especialidades desee (minimo una), además no se deberán repetir especialidades");
+                        System.out.println("-Para añadir una especialidad introduzca uno de los valores asignados a cada especialidad ej: 1");
+                        System.out.println("-Para finalizar la seleccion de especialidades simplemente introduzca un valor fuera del rango de especialidades.");
+                        do {
+                        	encontrado =false;
+                        	verificar=false;
+                            
+                            System.out.print("Introduzca la especialidad a continuacion: ");
+                            try {
+                                especialidadNum = leer.nextInt();
+                                leer.nextLine();
+                                if(especialidadNum>0 && especialidadNum<=Especialidades.values().length) {
+                                	especialidad=Especialidades.values()[especialidadNum-1];
+                                    for (Especialidades e  : artista.getEspecialidad()) {
+									if(especialidad==e) {
+										System.out.println("\t Especialidad repetida, intentelo de nuevo por favor.");
+										encontrado=true;
+									}	
+									}
+                                    if(encontrado==false) {
+                                   	
+                                    artista.getEspecialidad().add(especialidad);
+                                    System.out.println("\t Añadida especialidad: "+especialidad.toString());
+                                    }   
+                                } else {
+                                    verificar = true;
+                                    System.out.println("\t Seleccion de especialidades finalizada.");
+                                }
+                            } catch(InputMismatchException e) {
+                                System.out.println("Introduzca un número por favor");
+                                leer.nextLine();
+                                verificar = false;
+                            }
+                        } while(!verificar);
+    
+                    } else {
+                        System.out.println("\\t Perfil no válido, intentelo de nuevo por favor");
+                    }
+                } while(!perfilValido);
+
+                // Verificar registro
+                System.out.println("Estos son los datos que ha introducido:");
+                System.out.println("Email: "+email);
+                System.out.println("Nombre: "+nombre);
+                System.out.println("Nacionalidad: "+idNacionalidad);
+                System.out.println("Nombre de usuario: "+nombreUsuario);
+                System.out.println("Nacionalidad: "+nacionalidad);
+               // System.out.println("Perfil: "+perfil);
+
+                do {
+                    System.out.println("Desea continuar con el registro? Introduzca (s) para confirmar o (n) para cancelar el registro");
+                    respuesta = leer.nextLine();
+                    verificar = Herramientas.confirmarRechazar(respuesta);
+                    if(!verificar) {System.out.println("\t Respuesta no valida, intentelo de nuevo");}
+                } while (!verificar);
+                if(respuesta.equals("s")) {
+
+                	int contador=1;
+                	try(BufferedReader br = new BufferedReader(new FileReader(PropertiesClass.obtenerPropiedad("credenciales")))){
+                		while(( br.readLine())!=null) {
+                		contador++;	          	
+                		}
+                		
+                		
+                	}catch(FileNotFoundException e) {}
+                	catch(IOException e) {System.out.println(e.getMessage());}
+                	try(BufferedWriter bw = new BufferedWriter(new FileWriter(PropertiesClass.obtenerPropiedad("credenciales"),true))){
+                		String credencial = contador+"|"+nombreUsuario+"|"+password+"|"+email+"|"+nombre+"|"+nacionalidad+"|"+perfil.toString()+"\n";
+                		bw.write(credencial);
+                		System.out.println("Persona registrada con exito");
+                	
+                	}catch(IOException e) {System.out.println(e.getMessage());}
+
+                }else {System.out.println("Registro interrumpido");}
+
         }
-	
-		
-		
 
 	public static void main(String[] args) {
 		
