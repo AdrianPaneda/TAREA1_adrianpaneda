@@ -8,7 +8,7 @@ package entidades;
  *
  * @author Adrian Pañeda Hamadi
  */
-public class Persona {
+public abstract class Persona {
     
     private Long id;
     private String email;

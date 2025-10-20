@@ -343,30 +343,63 @@ public class CircoMainClass {
                     if(!verificar) {System.out.println("\t Respuesta no valida, intentelo de nuevo");}
                 } while (!verificar);
                 if(respuesta.equals("s")) {
-
+                	boolean repetido = false;
                 	int contador=1;
                 	try(BufferedReader br = new BufferedReader(new FileReader(PropertiesClass.obtenerPropiedad("credenciales")))){
-                		while(( br.readLine())!=null) {
-                		contador++;	          	
+                		String linea;
+                		String[]datos;
+                		while((linea= br.readLine())!=null) {
+                		contador++;
+                		datos=linea.split("|");
+                		if(datos[1].equals(nombreUsuario)) {
+                			System.out.println("Error, este nombre de usuario ya esta registrado.");
+                			repetido=true;
+                		}else if(datos[3].equals(email)) {
+                		System.out.println("Error, este email ya esta registrado.");	
                 		}
-                		
-                		
-                	}catch(FileNotFoundException e) {}
+                		}
+                	}catch(FileNotFoundException e) {System.out.println("Error fichero no encontrado: "+e.getMessage());}
                 	catch(IOException e) {System.out.println(e.getMessage());}
+                	if(repetido==false) {
                 	try(BufferedWriter bw = new BufferedWriter(new FileWriter(PropertiesClass.obtenerPropiedad("credenciales"),true))){
                 		String credencial = contador+"|"+nombreUsuario+"|"+password+"|"+email+"|"+nombre+"|"+nacionalidad+"|"+perfil.toString()+"\n";
                 		bw.write(credencial);
                 		System.out.println("Persona registrada con exito");
                 	
                 	}catch(IOException e) {System.out.println(e.getMessage());}
-
+                }
+                
                 }else {System.out.println("Registro interrumpido");}
-
         }
 
 	public static void main(String[] args) {
 		
-	registrarPersona();
+	// registrarPersona();
+	System.out.println("\n*** 🎪 ¡BIENVENIDOS AL GRAN CIRCO! 🎪 ***");
+	int eleccion=0;
+	Sesion sesion = new Sesion();
+	do {
+	System.out.println("1-Visualizar espectaculos");
+	System.out.println("2-Log in");
+	System.out.print("Introduzca una opcion a continuacion: ");
+	eleccion=leer.nextInt();
+	switch(eleccion) {
+	
+	case 1: break;
+	
+	
+	case 2:
+	
+	
+	
+	
+	}
+		
+		
+		
+		
+	}while(eleccion!=3);
+
 		
 	}
 
