@@ -18,12 +18,14 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -34,11 +36,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-
-
 public class CircoMainClass {
-	
-	
+		
 	public static Scanner leer = new Scanner(System.in);
         
         /**
@@ -140,10 +139,86 @@ public class CircoMainClass {
                  return listaPaises;
  
         }
-        public static void escribirPersona() {
-   	
+        /**
+         * Metodo para buscar persona 
+         * @param email
+         * @param nombreusuario
+         * @return boolean
+         */
+        public static boolean buscarPersona(String email,String nombreusuario) {
+        	
+        	boolean repetido=false;
+        	try(BufferedReader br = new BufferedReader(new FileReader(PropertiesClass.obtenerPropiedad("credenciales")))){
+        	
+        		String linea;
+        		String[]datos;
+        		while((linea=br.readLine())!= null) {
+        		datos=linea.split("\\|");
+        		if(datos[1].equals(nombreusuario)) {
+        			repetido=true;
+        			
+        		}else if(datos[3].equals(email)) {	
+        		repetido=true;
+        		}
+        		}       		
+        	}catch(IOException e) {}
+        	
+        	return repetido;
+        	
         }
         
+       
+        /**
+         * Metodo para generar id autoincrement
+         * @param tipo
+         * @return int
+         */
+        public static int generarId(String tipo) {
+            int contador = 1;
+            try (BufferedReader br = new BufferedReader(new FileReader(PropertiesClass.obtenerPropiedad("credenciales")))) {
+                String linea;
+
+                while ((linea = br.readLine()) != null) {
+                    String[] datos = linea.split("\\|");
+                    if (datos.length > 6) {
+                        switch (tipo.toLowerCase()) {
+                            case "artista":
+                            case "coordinacion":
+                                if (datos[6].equalsIgnoreCase(tipo)) {
+                                    contador++;
+                                }
+                                break;
+                            case "persona":
+                                contador++;
+                                break;
+                            default:
+                                System.out.println("Error: " + tipo);
+                                break;
+                        }
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                System.out.println("Fichero no encontrado");
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+            return contador;
+        }
+        
+        public static LocalDate verificarFecha(String fecha) {
+        	  LocalDate date=null;
+        	  DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");  
+         	  while(date == null) {	                      		 
+         		  try {
+         		  date = LocalDate.parse(fecha, formato);
+         		  }
+                           catch(DateTimeParseException e){
+         			  System.out.println("\\t Fecha no válida,intentelo de nuevo");	                        			  
+                           }	  	
+        }
+         	  return date;
+        }
+
         /**
          * Metodo para registrar persona
          * @param
@@ -212,8 +287,7 @@ public class CircoMainClass {
                     verificar = Herramientas.verificarContrasena(password);
                     if(!verificar) {System.out.println("\t Contraseña no válida(Minimo 3 caracteres sin espacios en blanco), intentelo de nuevo");}
    
-                } while (!verificar); 
-                
+                } while (!verificar);   
                 //AsignarPerfil
                 //Perfiles perfil = asignarPerfil();
                 boolean perfilValido=false;
@@ -238,7 +312,7 @@ public class CircoMainClass {
                             System.out.println("\t Respuesta no valida, intentelo de nuevo");
                         } else { 
                             if(respuesta.equalsIgnoreCase("s")) {
-                             senior=true;
+                              senior=true;
                           	  String fecha;
                           	  DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");  
                           	  while(fechaSenior == null) {
@@ -334,7 +408,7 @@ public class CircoMainClass {
                 System.out.println("Nacionalidad: "+idNacionalidad);
                 System.out.println("Nombre de usuario: "+nombreUsuario);
                 System.out.println("Nacionalidad: "+nacionalidad);
-               // System.out.println("Perfil: "+perfil);
+               
 
                 do {
                     System.out.println("Desea continuar con el registro? Introduzca (s) para confirmar o (n) para cancelar el registro");
@@ -344,25 +418,11 @@ public class CircoMainClass {
                 } while (!verificar);
                 if(respuesta.equals("s")) {
                 	boolean repetido = false;
-                	int contador=1;
-                	try(BufferedReader br = new BufferedReader(new FileReader(PropertiesClass.obtenerPropiedad("credenciales")))){
-                		String linea;
-                		String[]datos;
-                		while((linea= br.readLine())!=null) {
-                		contador++;
-                		datos=linea.split("|");
-                		if(datos[1].equals(nombreUsuario)) {
-                			System.out.println("Error, este nombre de usuario ya esta registrado.");
-                			repetido=true;
-                		}else if(datos[3].equals(email)) {
-                		System.out.println("Error, este email ya esta registrado.");	
-                		}
-                		}
-                	}catch(FileNotFoundException e) {System.out.println("Error fichero no encontrado: "+e.getMessage());}
-                	catch(IOException e) {System.out.println(e.getMessage());}
+                	repetido = buscarPersona(email, nombreUsuario);
+                	int id = generarId("persona");
                 	if(repetido==false) {
                 	try(BufferedWriter bw = new BufferedWriter(new FileWriter(PropertiesClass.obtenerPropiedad("credenciales"),true))){
-                		String credencial = contador+"|"+nombreUsuario+"|"+password+"|"+email+"|"+nombre+"|"+nacionalidad+"|"+perfil.toString()+"\n";
+                		String credencial = id+"|"+nombreUsuario+"|"+password+"|"+email+"|"+nombre+"|"+nacionalidad+"|"+perfil.toString()+"\n";
                 		bw.write(credencial);
                 		System.out.println("Persona registrada con exito");
                 	
@@ -371,33 +431,222 @@ public class CircoMainClass {
                 
                 }else {System.out.println("Registro interrumpido");}
         }
+        
+        public static String iniciarSesion(String nombreUsuario,String password) {
+        	
+        	String linea;
+        	String[]datos;
+        	String perfil="";
+        	try(BufferedReader br = new BufferedReader(new FileReader(PropertiesClass.obtenerPropiedad("credenciales")))){
+        		
+        	while((linea=br.readLine())!=null) {
+        	datos=linea.split("\\|");
+        	if(nombreUsuario.equals(datos[1])&&password.equals(datos[2])) {
+        	System.out.println("\t Sesion iniciada con exito");
+        	System.out.println("Bienvenido "+nombreUsuario+ " que desea hacer?");
+        	perfil=datos[6];
+        	}	
+        	}		
+        	}
+        	catch(FileNotFoundException e) {System.out.println("Fichero no encontrado"+e.getMessage());}
+        	catch(IOException e) {}
+        	
+        return perfil;	
+        }
+        public static void crearEspectaculo(String perfil) {
+        	 String nombre;
+        	 boolean verificar=false;
+             do{
+                System.out.print("Introduzca el nombre del espectaculo continuacion:");
+                nombre=leer.nextLine();
+                if(nombre.length()>0&&nombre.length()<=25){
+                verificar=true;		
+                }
+                if(!verificar){
+                	System.out.println("\t Lo siento, nombre no valido.Solo se admiten desde 1 hasta 25 caracteres");
+                	}
 
+            }while(!verificar);
+             
+             String fechaIni;
+             String fechaFin;
+             LocalDate fechaInicio;
+             LocalDate fechaFinal;
+             do {
+             System.out.print("Introduzca la fecha de inicio a continuacion(dd/mm/yyy): ");
+             fechaIni=leer.nextLine();
+             fechaInicio = verificarFecha(fechaIni);
+             System.out.print("Introduzca la fecha de inicio a continuacion(dd/mm/yyy): ");
+             fechaFin=leer.nextLine();
+             fechaFinal = verificarFecha(fechaFin);
+             // Sacamos la diferencia entre fechas
+             Period diferencia = Period.between(fechaInicio, fechaFinal);
+             if(diferencia.getYears()>1) { 
+            	 verificar=false;
+            	 System.out.println("\t Error la diferencia dentre la fecha de inicio y la final no puede superar el año.");		 
+             }
+             
+             }while(!verificar);
+             
+             Espectaculo
+             espectaculo = new Espectaculo(nombre,fechaInicio,fechaFinal);
+        	
+        }
+        public static void  crearModificarEspectaculos(String perfil) {
+        
+        	int eleccion=0;
+        	do {
+        		try {
+        	System.out.println("1-Crear nuevo espectaculo");	
+        	System.out.println("2-Modificar espectaculo existente");
+        	eleccion = leer.nextInt();
+        	leer.nextLine();
+        	switch(eleccion) {
+        	case 1:crearEspectaculo(perfil); break;
+        	case 2: break;
+        	default: System.out.println("Opcion no valida, intentelo de nuevo");
+        	}
+        		}catch(InputMismatchException e) {
+        			System.out.println("\t Opcion no valida, intentelo de nuevo");
+        			leer.nextLine();
+        		}
+        		
+        	}while(eleccion!=3);
+        }
+        
+        public static void gestionarEspectaculos(String perfil) {
+        	
+        	System.out.println("--Gestion de espectaculos--");
+        	int eleccion=0;
+        	do {
+        		try {
+        	System.out.println("1-Crear o modificar espectaculo");	
+        	System.out.println("2-Crear o modificar número");
+        	System.out.println("3-Asignar artistas");
+        	System.out.println("4-Salir de la gestion de espectaculos");
+        	eleccion=leer.nextInt();
+        	leer.nextLine();
+        	switch(eleccion) {
+        	
+        	case 1:crearModificarEspectaculos(perfil); break;
+        	case 2:System.out.println("\t Funcionalidad no disponible,se implementará en las proximas actualizaciones.Disculpe las molestias."); break;
+        	case 3:System.out.println("\t Funcionalidad no disponible,se implementará en las proximas actualizaciones.Disculpe las molestias."); break;
+        	case 4:System.out.println("\t Gestion de espectaculos finalizada."); break;
+
+        	}	
+        		}catch(InputMismatchException e) {
+        			System.out.println("Opcion no valida, intentelo de nuevo");
+        			leer.nextLine();
+        			}	
+        	}while(eleccion!=3);	
+        }
 	public static void main(String[] args) {
 		
 	// registrarPersona();
 	System.out.println("\n*** 🎪 ¡BIENVENIDOS AL GRAN CIRCO! 🎪 ***");
 	int eleccion=0;
+	String usuario;
+	String password;
+	boolean encontrado;
+	String perfil;
 	Sesion sesion = new Sesion();
 	do {
-	System.out.println("1-Visualizar espectaculos");
-	System.out.println("2-Log in");
-	System.out.print("Introduzca una opcion a continuacion: ");
-	eleccion=leer.nextInt();
-	switch(eleccion) {
+		try {
+	    System.out.println("--Perfil invitado");
+		System.out.println("1-Visualizar espectaculos");
+		System.out.println("2-Log in");
+		System.out.print("Introduzca una opcion a continuacion: ");
+		eleccion=leer.nextInt();
+		leer.nextLine();
 	
-	case 1: break;
-	
-	
-	case 2:
-	
-	
-	
-	
-	}
-		
-		
-		
-		
+		switch(eleccion) {
+			
+			case 1: break;
+			
+			
+			case 2:
+				System.out.print("Introduzca el nombre de usuario a continuacion: ");
+				usuario = leer.nextLine();
+				System.out.print("Introduzca la contraseña a continuacion: ");
+				password=leer.nextLine();
+				encontrado=buscarPersona(password, usuario);
+				if(encontrado) {
+				perfil=iniciarSesion(usuario, password);
+				if(perfil.equals(Perfiles.artista.toString())) {
+					//Iniciamos la sesion
+					sesion.setNombre(usuario);
+					sesion.setPerfil(Perfiles.artista);
+					do {
+						try {
+					System.out.println("1-Ver ficha");
+					System.out.println("2-Ver espectaculo completo");
+					System.out.println("3-Log out");
+					eleccion=leer.nextInt();
+					switch(eleccion) {
+						case 1:System.out.println("\t Funcionalidad no disponible,se implementará en las proximas actualizaciones.Disculpe las molestias."); break;
+						case 2:System.out.println("\t Funcionalidad no disponible,se implementará en las proximas actualizaciones.Disculpe las molestias."); break; 
+						case 3:
+							sesion=new Sesion();
+							System.out.println("\t Logged out"); break;
+						default: System.out.println("\t Opcion no válida, intentalo de nuevo");break;
+						}					
+						}catch(InputMismatchException e) {System.out.println("\t Opcion no válida, intentelo de nuevo");}
+						
+					}while(eleccion!=3);
+					eleccion=0;
+				}else if(perfil.equals(Perfiles.coordinacion.toString())){
+					
+					sesion.setNombre(usuario);
+					sesion.setPerfil(Perfiles.coordinacion);
+					do {
+						try {
+							
+							System.out.println("1-Ver espectaculo completo");
+							System.out.println("2-Gestionar espectaculos");
+							System.out.println("3-Log out");
+							eleccion=leer.nextInt();
+							switch(eleccion) {
+							case 1:System.out.println("\t Funcionalidad no disponible,se implementará en las proximas actualizaciones.Disculpe las molestias."); break; 
+							case 2:gestionarEspectaculos(perfil.toString()); break; 
+							case 3: 
+								sesion=new Sesion();
+								System.out.println("Logged out");
+								break;
+							}
+					
+						}catch(InputMismatchException e) {System.out.println("\t Opcion no válida, intentelo de nuevo");}
+						
+				}while(eleccion!=3);
+					eleccion=0;
+				
+				}
+				
+				}else if(usuario.equals(PropertiesClass.obtenerPropiedad("usuarioAdmin").toString())
+						&&password.equals(PropertiesClass.obtenerPropiedad("contraseñaAdmin").toString())){
+					sesion.setNombre(PropertiesClass.obtenerPropiedad("usuarioAdmin").toString());
+					System.out.println("---ADMINISTRADOR---");
+					do {	
+					System.out.println("1-Registrar persona");
+					System.out.println("2--Gestionar espectaculos");
+					System.out.println("3-Log out");
+					eleccion=leer.nextInt();
+					leer.nextLine();
+					
+					switch(eleccion) {
+					case 1: registrarPersona(); break;
+					case 2: gestionarEspectaculos(PropertiesClass.obtenerPropiedad("usuarioAdmin"));
+					case 3:
+						sesion=new Sesion();
+						System.out.println("\t Logged out");
+					}
+					
+					}while(eleccion!=3);
+					eleccion=0;
+				}
+		}
+		}catch(InputMismatchException e) {System.out.println("\t Opcion no válida, intentelo de nuevo");
+		leer.nextLine();
+		}
 	}while(eleccion!=3);
 
 		
