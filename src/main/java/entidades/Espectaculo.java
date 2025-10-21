@@ -20,8 +20,8 @@ public class Espectaculo implements Serializable {
     private Long idCoord;
 
 
-	public Espectaculo(String nombre, LocalDate fechaini, LocalDate fechafin) {
-        
+	public Espectaculo(Long id,String nombre, LocalDate fechaini, LocalDate fechafin) {
+        this.id=id;
         this.nombre = nombre;
         this.fechaini = fechaini;
         this.fechafin = fechafin;

@@ -12,17 +12,23 @@ import herramientas.PropertiesClass;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.EOFException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -39,7 +45,6 @@ import org.xml.sax.SAXException;
 public class CircoMainClass {
 		
 	public static Scanner leer = new Scanner(System.in);
-        
         /**
          * Metodo para recorrer nodos del xml paises
          * @param nodos
@@ -60,8 +65,7 @@ public class CircoMainClass {
                 }
                 }
             return paises;
-            }        
-        
+            }               
         /**
          * Metodo para encontrar pais en xml con DOM 
          * @param idPais
@@ -100,8 +104,7 @@ public class CircoMainClass {
                 System.out.println("Error al crear el parser: "+e.getMessage());
             }
        return encontrado;
-        }
-        	
+        }	
         /**
          * Metodo para listar paises
          * @param fichero 
@@ -165,9 +168,7 @@ public class CircoMainClass {
         	
         	return repetido;
         	
-        }
-        
-       
+        }     
         /**
          * Metodo para generar id autoincrement
          * @param tipo
@@ -192,7 +193,7 @@ public class CircoMainClass {
                                 contador++;
                                 break;
                             default:
-                                System.out.println("Error: " + tipo);
+                                System.out.println("Error: Tipo no valido("+tipo+")");
                                 break;
                         }
                     }
@@ -203,8 +204,12 @@ public class CircoMainClass {
                 System.out.println(e.getMessage());
             }
             return contador;
-        }
-        
+        } 
+        /**
+         * Metodo para verificar fecha
+         * @param fecha
+         * @return
+         */
         public static LocalDate verificarFecha(String fecha) {
         	  LocalDate date=null;
         	  DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");  
@@ -218,7 +223,6 @@ public class CircoMainClass {
         }
          	  return date;
         }
-
         /**
          * Metodo para registrar persona
          * @param
@@ -276,8 +280,7 @@ public class CircoMainClass {
                     System.out.print("Introduzca el nombre de usuario a continuacion:");
                     nombreUsuario = leer.nextLine();
                     verificar = Herramientas.verificarNombreusuario(nombreUsuario);
-                    if(!verificar) {System.out.println("\t Error, nombre de usuario no valido, intentelo de nuevo");}
-   
+                    if(!verificar) {System.out.println("\t Error, nombre de usuario no valido, intentelo de nuevo");} 
                 } while (!verificar);
                // Contraseña
                 String password;
@@ -286,7 +289,7 @@ public class CircoMainClass {
                     password = leer.nextLine();
                     verificar = Herramientas.verificarContrasena(password);
                     if(!verificar) {System.out.println("\t Contraseña no válida(Minimo 3 caracteres sin espacios en blanco), intentelo de nuevo");}
-   
+
                 } while (!verificar);   
                 //AsignarPerfil
                 //Perfiles perfil = asignarPerfil();
@@ -400,7 +403,6 @@ public class CircoMainClass {
                         System.out.println("\\t Perfil no válido, intentelo de nuevo por favor");
                     }
                 } while(!perfilValido);
-
                 // Verificar registro
                 System.out.println("Estos son los datos que ha introducido:");
                 System.out.println("Email: "+email);
@@ -431,9 +433,13 @@ public class CircoMainClass {
                 
                 }else {System.out.println("Registro interrumpido");}
         }
-        
-        public static String iniciarSesion(String nombreUsuario,String password) {
-        	
+        /**
+         * Metodo iniciar sesion
+         * @param nombreUsuario
+         * @param password
+         * @return
+         */
+        public static String iniciarSesion(String nombreUsuario,String password) {        	
         	String linea;
         	String[]datos;
         	String perfil="";
@@ -453,15 +459,91 @@ public class CircoMainClass {
         	
         return perfil;	
         }
-        public static void crearEspectaculo(String perfil) {
+        
+        /**
+         * Metodo para comprobar si el id del espectáculo ya existe
+         * @param id
+         * @return boolean
+         */
+        public static boolean comprobarIdEspectaculo(Long id) {
+        	
+        	boolean encontrado=false;
+        	   try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream (PropertiesClass.obtenerPropiedad("espectaculos")))){
+
+        		   while(true){
+        		       try{
+        		       Espectaculo espectaculo = (Espectaculo) ois.readObject();
+        		       if(espectaculo.getId()==id) {
+        		    	   encontrado=true;
+        		       }
+        		       }catch(EOFException e){break;}    		   
+        		   }
+        		   }catch(ClassNotFoundException | IOException e){System.out.println(e.getMessage());
+        		   }	      	
+        	   		return encontrado;  
+      }
+        /**
+         * Metodo para generar coordinadores
+         * @return Map<Integer,String>
+         */
+        public static Map<Integer,String> generarCoordinadores() {
+        	
+        	Map<Integer,String> coordinadores = new LinkedHashMap<>();
+        	try (BufferedReader br = new BufferedReader(new FileReader(PropertiesClass.obtenerPropiedad("credenciales")))) {	
+        	String linea;
+        	String[]datos;
+        	int contador=1;
+            while ((linea = br.readLine()) != null) {
+            datos=linea.split("\\|");
+            coordinadores.put(contador,datos[1]);
+            contador++;
+            	
+            }
+        	 } catch (FileNotFoundException e) {
+                 System.out.println("Fichero no encontrado");
+             } catch (IOException e) {
+                 System.out.println(e.getMessage());
+             }
+        	return coordinadores;
+        }
+        /**
+         * Método para escribir espectaculo en fichero binario
+         * @param espectaculo
+         */
+        public static void escribirEspectaculo(Espectaculo espectaculo) {
+        	
+        	 try(ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(PropertiesClass.obtenerPropiedad("espectaculos"),true))){
+        	       oos.writeObject(espectaculo);
+        	       System.out.println("\t Espectaculo añadido con exito");
+        	   } catch(IOException e){System.out.println("Error al escribir el archivo"+e.getMessage());}	
+        }
+        /**
+         * Metodo para pedir datos de espectaulo
+         * @param perfil
+         */
+        public static void crearEspectaculo(String perfil,String nombreUsuario) {
         	 String nombre;
         	 boolean verificar=false;
-             do{
+        	 Long id=0L;
+        	 do {
+        		 try {
+        		System.out.println("Introduzca el id a continuacion: ");
+        		id=leer.nextLong();
+        		verificar=comprobarIdEspectaculo(id);
+        		if(verificar==true) {System.out.println("Este id ya esta registrado intentelo de nuevo.");}   
+        		 }catch(InputMismatchException e) {
+        			 System.out.println("id no valido, intentelo de nuevo");
+        			 leer.nextLine();
+        			
+        			 }
+        		 leer.nextLine();
+        	 }while(verificar);
+             do{ 
                 System.out.print("Introduzca el nombre del espectaculo continuacion:");
                 nombre=leer.nextLine();
                 if(nombre.length()>0&&nombre.length()<=25){
                 verificar=true;		
-                }
+                }else verificar=false;
                 if(!verificar){
                 	System.out.println("\t Lo siento, nombre no valido.Solo se admiten desde 1 hasta 25 caracteres");
                 	}
@@ -484,27 +566,68 @@ public class CircoMainClass {
              if(diferencia.getYears()>1) { 
             	 verificar=false;
             	 System.out.println("\t Error la diferencia dentre la fecha de inicio y la final no puede superar el año.");		 
-             }
-             
+             }else verificar=true;         
              }while(!verificar);
-             
-             Espectaculo
-             espectaculo = new Espectaculo(nombre,fechaInicio,fechaFinal);
-        	
+          Espectaculo
+             espectaculo = new Espectaculo(id,nombre,fechaInicio,fechaFinal);
+          	 if(perfil.equalsIgnoreCase("coordinador")) {
+          		Long contador=1L;
+          		try (BufferedReader br = new BufferedReader(new FileReader(PropertiesClass.obtenerPropiedad("credenciales")))) {
+          			String linea;
+          			String[]datos;
+          			String nombreU="";
+          		    do {
+          		    while((linea=br.readLine())!=null) {	
+          		    datos=linea.split("\\|");
+          		    nombreU=datos[6];
+          		    if(datos[6].equals(perfil)) {
+          		    contador++;	
+          		    }	    	
+          		    }		
+          		    }while(nombreU.equalsIgnoreCase(nombreUsuario));	
+	
+          		} catch (FileNotFoundException e) {
+                    System.out.println("Fichero no encontrado");
+                } catch (IOException e) {
+                    System.out.println(e.getMessage());
+                }
+          		
+          		espectaculo.setIdCoord(contador);
+          		escribirEspectaculo(espectaculo);	 
+          	 }else {
+          		 Map<Integer,String> coordinadores = generarCoordinadores();
+          		 verificar=false;
+          		 do {
+          		 System.out.println("--Coordinadores--");
+          		 for (Map.Entry<Integer, String> entry : coordinadores.entrySet()) {
+					
+          			 System.out.println("-"+entry.getKey()+": "+entry.getValue());
+					
+				}
+          		 System.out.println("Asigne uno de los coordinadores al espectaculo a continuacion:");	 
+          			 
+					
+				} while (!verificar);
+          		 
+	 
+          	 }	 
         }
-        public static void  crearModificarEspectaculos(String perfil) {
-        
+        /**
+         * 
+         * @param perfil
+         */
+        public static void  crearModificarEspectaculos(String perfil,String nombreUsuario) {
         	int eleccion=0;
         	do {
         		try {
-        	System.out.println("1-Crear nuevo espectaculo");	
-        	System.out.println("2-Modificar espectaculo existente");
-        	eleccion = leer.nextInt();
-        	leer.nextLine();
-        	switch(eleccion) {
-        	case 1:crearEspectaculo(perfil); break;
-        	case 2: break;
-        	default: System.out.println("Opcion no valida, intentelo de nuevo");
+		        	System.out.println("1-Crear nuevo espectaculo");	
+		        	System.out.println("2-Modificar espectaculo existente");
+		        	eleccion = leer.nextInt();
+		        	leer.nextLine();
+		        	switch(eleccion) {
+		        	case 1:crearEspectaculo(perfil,nombreUsuario); break;
+		        	case 2: break;
+		        	default: System.out.println("Opcion no valida, intentelo de nuevo");
         	}
         		}catch(InputMismatchException e) {
         			System.out.println("\t Opcion no valida, intentelo de nuevo");
@@ -513,26 +636,27 @@ public class CircoMainClass {
         		
         	}while(eleccion!=3);
         }
-        
-        public static void gestionarEspectaculos(String perfil) {
+        /**
+         * 
+         * @param perfil
+         */
+        public static void gestionarEspectaculos(String perfil,String nombreUsuario) {
         	
         	System.out.println("--Gestion de espectaculos--");
         	int eleccion=0;
         	do {
         		try {
-        	System.out.println("1-Crear o modificar espectaculo");	
-        	System.out.println("2-Crear o modificar número");
-        	System.out.println("3-Asignar artistas");
-        	System.out.println("4-Salir de la gestion de espectaculos");
-        	eleccion=leer.nextInt();
-        	leer.nextLine();
-        	switch(eleccion) {
-        	
-        	case 1:crearModificarEspectaculos(perfil); break;
-        	case 2:System.out.println("\t Funcionalidad no disponible,se implementará en las proximas actualizaciones.Disculpe las molestias."); break;
-        	case 3:System.out.println("\t Funcionalidad no disponible,se implementará en las proximas actualizaciones.Disculpe las molestias."); break;
-        	case 4:System.out.println("\t Gestion de espectaculos finalizada."); break;
-
+		        	System.out.println("1-Crear o modificar espectaculo");	
+		        	System.out.println("2-Crear o modificar número");
+		        	System.out.println("3-Asignar artistas");
+		        	System.out.println("4-Salir de la gestion de espectaculos");
+		        	eleccion=leer.nextInt();
+		        	leer.nextLine();
+		        	switch(eleccion) {	
+		        	case 1:crearModificarEspectaculos(perfil,nombreUsuario); break;
+		        	case 2:System.out.println("\t Funcionalidad no disponible,se implementará en las proximas actualizaciones.Disculpe las molestias."); break;
+		        	case 3:System.out.println("\t Funcionalidad no disponible,se implementará en las proximas actualizaciones.Disculpe las molestias."); break;
+		        	case 4:System.out.println("\t Gestion de espectaculos finalizada."); break;
         	}	
         		}catch(InputMismatchException e) {
         			System.out.println("Opcion no valida, intentelo de nuevo");
@@ -607,20 +731,18 @@ public class CircoMainClass {
 							eleccion=leer.nextInt();
 							switch(eleccion) {
 							case 1:System.out.println("\t Funcionalidad no disponible,se implementará en las proximas actualizaciones.Disculpe las molestias."); break; 
-							case 2:gestionarEspectaculos(perfil.toString()); break; 
+							case 2:gestionarEspectaculos(perfil.toString(),usuario); break; 
 							case 3: 
 								sesion=new Sesion();
 								System.out.println("Logged out");
 								break;
 							}
 					
-						}catch(InputMismatchException e) {System.out.println("\t Opcion no válida, intentelo de nuevo");}
-						
+						}catch(InputMismatchException e) {System.out.println("\t Opcion no válida, intentelo de nuevo");}		
 				}while(eleccion!=3);
 					eleccion=0;
 				
 				}
-				
 				}else if(usuario.equals(PropertiesClass.obtenerPropiedad("usuarioAdmin").toString())
 						&&password.equals(PropertiesClass.obtenerPropiedad("contraseñaAdmin").toString())){
 					sesion.setNombre(PropertiesClass.obtenerPropiedad("usuarioAdmin").toString());
@@ -631,15 +753,14 @@ public class CircoMainClass {
 					System.out.println("3-Log out");
 					eleccion=leer.nextInt();
 					leer.nextLine();
-					
+
 					switch(eleccion) {
 					case 1: registrarPersona(); break;
-					case 2: gestionarEspectaculos(PropertiesClass.obtenerPropiedad("usuarioAdmin"));
+					case 2: gestionarEspectaculos(PropertiesClass.obtenerPropiedad("usuarioAdmin"),PropertiesClass.obtenerPropiedad("usuarioAdmin"));
 					case 3:
 						sesion=new Sesion();
 						System.out.println("\t Logged out");
 					}
-					
 					}while(eleccion!=3);
 					eleccion=0;
 				}
@@ -647,9 +768,6 @@ public class CircoMainClass {
 		}catch(InputMismatchException e) {System.out.println("\t Opcion no válida, intentelo de nuevo");
 		leer.nextLine();
 		}
-	}while(eleccion!=3);
-
-		
+	}while(eleccion!=3);	
 	}
-
 }
