@@ -486,13 +486,13 @@ public class CircoMainClass {
          * Metodo para generar coordinadores
          * @return Map<Integer,String>
          */
-        public static Map<Integer,String> generarCoordinadores() {
+        public static Map<Long,String> generarCoordinadores() {
         	
-        	Map<Integer,String> coordinadores = new LinkedHashMap<>();
+        	Map<Long,String> coordinadores = new LinkedHashMap<>();
         	try (BufferedReader br = new BufferedReader(new FileReader(PropertiesClass.obtenerPropiedad("credenciales")))) {	
         	String linea;
         	String[]datos;
-        	int contador=1;
+        	Long contador=1L;
             while ((linea = br.readLine()) != null) {
             datos=linea.split("\\|");
             coordinadores.put(contador,datos[1]);
@@ -595,18 +595,34 @@ public class CircoMainClass {
           		espectaculo.setIdCoord(contador);
           		escribirEspectaculo(espectaculo);	 
           	 }else {
-          		 Map<Integer,String> coordinadores = generarCoordinadores();
+          		 Long coordinador=0L;
+          		 Map<Long,String> coordinadores = generarCoordinadores();
           		 verificar=false;
           		 do {
+          			 try {
           		 System.out.println("--Coordinadores--");
-          		 for (Map.Entry<Integer, String> entry : coordinadores.entrySet()) {
+          		 for (Map.Entry<Long, String> entry : coordinadores.entrySet()) {
 					
           			 System.out.println("-"+entry.getKey()+": "+entry.getValue());
 					
 				}
           		 System.out.println("Asigne uno de los coordinadores al espectaculo a continuacion:");	 
+          		
+          		  coordinador=leer.nextLong();
+          		  leer.nextLine();
+          		  
+          		  if(coordinadores.containsKey(coordinador)) {
+          			  
+          		  espectaculo.setIdCoord(coordinador);
+          		  System.out.println("\t Coordinador: "+coordinadores.get(coordinador)+" añadido correctamente");
+          		  escribirEspectaculo(espectaculo);
+          		  verificar=true;		  
+          		  }
+          			 }catch(InputMismatchException e) {
+          				 System.out.println("\t Error opcion no valida, intentelo de nuevo");
+          				 leer.nextLine();
+          				 }
           			 
-					
 				} while (!verificar);
           		 
 	 
