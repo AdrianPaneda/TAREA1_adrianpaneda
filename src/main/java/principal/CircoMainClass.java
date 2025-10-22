@@ -715,6 +715,7 @@ public class CircoMainClass {
 		        	case 2:System.out.println("\t Funcionalidad no disponible,se implementará en las proximas actualizaciones.Disculpe las molestias."); break;
 		        	case 3:System.out.println("\t Funcionalidad no disponible,se implementará en las proximas actualizaciones.Disculpe las molestias."); break;
 		        	case 4:System.out.println("\t Gestion de espectaculos finalizada."); break;
+		        	default: System.out.println("Opcion no valida,intentelo de nuevo");break;
         	}	
         		}catch(InputMismatchException e) {
         			System.out.println("Opcion no valida, intentelo de nuevo");
@@ -744,8 +745,7 @@ public class CircoMainClass {
 		switch(eleccion) {
 			
 			case 1: break;
-			
-			
+
 			case 2:
 				System.out.print("Introduzca el nombre de usuario a continuacion: ");
 				usuario = leer.nextLine();
@@ -772,15 +772,18 @@ public class CircoMainClass {
 								case 2:gestionarEspectaculos(perfil.toString(),usuario); break; 
 								case 3: 
 									sesion=new Sesion();
-									System.out.println("Logged out");
+									System.out.println("\t Logged out");
 									break;
 								default: System.out.println("Opcion no valida, intentelo de nuevo");
 								}
 						
-							}catch(InputMismatchException e) {System.out.println("\t Opcion no válida, intentelo de nuevo");}		
+							}catch(InputMismatchException e) {
+								System.out.println("\t Opcion no válida, intentelo de nuevo");
+								leer.nextLine();
+								}		
 					}while(eleccion!=3);
 						eleccion=0;
-						break;
+						continue;
 				
 				
 				case artista:
@@ -800,13 +803,14 @@ public class CircoMainClass {
 									System.out.println("\t Logged out"); break;
 								default: System.out.println("\t Opcion no válida, intentalo de nuevo");break;
 								}					
-								}catch(InputMismatchException e) {System.out.println("\t Opcion no válida, intentelo de nuevo");}
+								}catch(InputMismatchException e) {
+									System.out.println("\t Opcion no válida, intentelo de nuevo");
+									leer.nextLine();
+									}
 								
 							}while(eleccion!=3);
 							eleccion=0;
-							break;	
-							
-				
+							continue;	
 				case admin :
 					
 							sesion.setNombre(PropertiesClass.obtenerPropiedad("usuarioAdmin").toString());
@@ -814,7 +818,7 @@ public class CircoMainClass {
 							do {	
 							try {
 							System.out.println("1-Registrar persona");
-							System.out.println("2--Gestionar espectaculos");
+							System.out.println("2-Gestionar espectaculos");
 							System.out.println("3-Log out");
 							eleccion=leer.nextInt();
 							leer.nextLine();
@@ -825,18 +829,18 @@ public class CircoMainClass {
 							case 3:
 								sesion=new Sesion();
 								System.out.println("\t Logged out");
+								break;
 							
 							}
 							}catch(InputMismatchException e) {System.out.println("Opcion no valida,intentelo de nuevo");}
 							}while(eleccion!=3);
 							eleccion=0;
-					break;
-					
-				
-		
+							continue;
 				}
-               }else {System.out.println("\t Perfil no encontrado, intentelo de nuevo");}
-					
+               }
+				else {System.out.println("\t Perfil no encontrado, intentelo de nuevo");
+				continue;
+				}	
 				default: System.out.println("\t Opcion no valida,intentelo de nuevo.");break;
 		
 		}}catch(InputMismatchException e) {
