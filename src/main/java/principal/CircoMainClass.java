@@ -148,9 +148,9 @@ public class CircoMainClass {
          * @param nombreusuario
          * @return boolean
          */
-        public static boolean buscarPersona(String email,String nombreusuario) {
+        public static boolean buscarPersona(String password,String nombreusuario) {
         	
-        	boolean repetido=false;
+        	boolean encontrado=false;
         	try(BufferedReader br = new BufferedReader(new FileReader(PropertiesClass.obtenerPropiedad("credenciales")))){
         	
         		String linea;
@@ -158,15 +158,19 @@ public class CircoMainClass {
         		while((linea=br.readLine())!= null) {
         		datos=linea.split("\\|");
         		if(datos[1].equals(nombreusuario)) {
-        			repetido=true;
+        			encontrado=true;
         			
-        		}else if(datos[3].equals(email)) {	
-        		repetido=true;
+        		}else if(datos[2].equals(password)) {	
+        		encontrado=true;
         		}
-        		}       		
+        		}  
+        		if(nombreusuario.equals(PropertiesClass.obtenerPropiedad("usuarioAdmin"))&&
+        				password.equals(PropertiesClass.obtenerPropiedad("contraseñaAdmin"))) {	
+        		encontrado=true;		
+        		}
         	}catch(IOException e) {}
         	
-        	return repetido;
+        	return encontrado;
         	
         }     
         /**
@@ -454,13 +458,12 @@ public class CircoMainClass {
         	perfilUsuario=datos[6];
         	perfil= Perfiles.valueOf(perfilUsuario);
         	
-        	}else if(nombreUsuario.equals(PropertiesClass.obtenerPropiedad("usuarioAdmin"))&&
-        			password.equals(PropertiesClass.obtenerPropiedad("contraseñaAdmin"))) {
-        				System.out.println("--** Administrador **--");
-        				perfil=Perfiles.admin;
+        	}
         		
         	}
-        	}		
+        	if(nombreUsuario.equals(PropertiesClass.obtenerPropiedad("usuarioAdmin"))&&
+        			password.equals(PropertiesClass.obtenerPropiedad("contraseñaAdmin"))) {
+        				perfil=Perfiles.admin;}	
         	}
         	catch(FileNotFoundException e) {System.out.println("Fichero no encontrado"+e.getMessage());}
         	catch(IOException e) {}
@@ -717,7 +720,7 @@ public class CircoMainClass {
         			System.out.println("Opcion no valida, intentelo de nuevo");
         			leer.nextLine();
         			}	
-        	}while(eleccion!=3);	
+        	}while(eleccion!=4);	
         }
 	public static void main(String[] args) {
 		
@@ -771,6 +774,7 @@ public class CircoMainClass {
 									sesion=new Sesion();
 									System.out.println("Logged out");
 									break;
+								default: System.out.println("Opcion no valida, intentelo de nuevo");
 								}
 						
 							}catch(InputMismatchException e) {System.out.println("\t Opcion no válida, intentelo de nuevo");}		
@@ -808,6 +812,7 @@ public class CircoMainClass {
 							sesion.setNombre(PropertiesClass.obtenerPropiedad("usuarioAdmin").toString());
 							System.out.println("---ADMINISTRADOR---");
 							do {	
+							try {
 							System.out.println("1-Registrar persona");
 							System.out.println("2--Gestionar espectaculos");
 							System.out.println("3-Log out");
@@ -816,23 +821,27 @@ public class CircoMainClass {
 		
 							switch(eleccion) {
 							case 1: registrarPersona(); break;
-							case 2: gestionarEspectaculos(PropertiesClass.obtenerPropiedad("usuarioAdmin"),PropertiesClass.obtenerPropiedad("usuarioAdmin"));
+							case 2: gestionarEspectaculos(PropertiesClass.obtenerPropiedad("usuarioAdmin"),PropertiesClass.obtenerPropiedad("usuarioAdmin"));break;
 							case 3:
 								sesion=new Sesion();
 								System.out.println("\t Logged out");
+							
 							}
+							}catch(InputMismatchException e) {System.out.println("Opcion no valida,intentelo de nuevo");}
 							}while(eleccion!=3);
 							eleccion=0;
 					break;
 					
-					default: System.out.println("\t Errror,perfil no identificado.");break;
-				}
-               }
-					
 				
 		
-		}}catch(InputMismatchException e) {System.out.println("\t Opcion no válida, intentelo de nuevo");
-		leer.nextLine();
+				}
+               }else {System.out.println("\t Perfil no encontrado, intentelo de nuevo");}
+					
+				default: System.out.println("\t Opcion no valida,intentelo de nuevo.");break;
+		
+		}}catch(InputMismatchException e) {
+			System.out.println("\t Opcion no válida, intentelo de nuevo");
+		    leer.nextLine();
 		}
 	}while(eleccion!=3);	
 	
