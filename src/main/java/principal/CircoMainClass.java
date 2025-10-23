@@ -28,17 +28,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
 import entidades.Artista;
 import entidades.Credenciales;
 import entidades.Especialidades;
@@ -117,6 +114,7 @@ public class CircoMainClass {
 	 * Metodo para listar paises
 	 * 
 	 * @param fichero
+	 * @return Map
 	 */
 	public static Map<String, String> listarPaises(File fichero) {
 		System.out.println("**Listado de paises**");
@@ -151,7 +149,7 @@ public class CircoMainClass {
 	/**
 	 * Metodo para buscar persona
 	 * 
-	 * @param email
+	 * @param password
 	 * @param nombreusuario
 	 * @return boolean
 	 */
@@ -186,7 +184,7 @@ public class CircoMainClass {
 	 * Metodo para generar id autoincrement
 	 * 
 	 * @param tipo
-	 * @return int
+	 * @return Integer
 	 */
 	public static int generarId(String tipo) {
 		int contador = 1;
@@ -224,7 +222,7 @@ public class CircoMainClass {
 	 * Metodo para parsear fecha
 	 * 
 	 * @param fecha
-	 * @return
+	 * @return LocalDate
 	 */
 	public static LocalDate parseFecha(String fecha) {
 		LocalDate date = null;
@@ -264,9 +262,9 @@ public class CircoMainClass {
 	}
 
 	/**
-	 * Metodo para ver si el email esta repetido
+	 * Metodo para ver si el nombre de usuario esta repetido
 	 * 
-	 * @param email
+	 * @param nombreUsuario
 	 * @return boolean
 	 */
 	public static boolean nombreUsuarioEncontrado(String nombreUsuario) {
@@ -283,6 +281,11 @@ public class CircoMainClass {
 					repetido = true;
 
 				}
+			}
+			if (nombreUsuario.equals(PropertiesClass.obtenerPropiedad("usuarioAdmin"))) {
+
+				repetido = true;
+
 			}
 
 		} catch (FileNotFoundException e) {
@@ -540,7 +543,7 @@ public class CircoMainClass {
 	 * 
 	 * @param nombreUsuario
 	 * @param password
-	 * @return
+	 * @return Perfiles
 	 */
 	public static Perfiles iniciarSesion(String nombreUsuario, String password) {
 		String linea;
@@ -603,7 +606,7 @@ public class CircoMainClass {
 	/**
 	 * Metodo para comprobar si el nombre de espectaculo es unico
 	 * 
-	 * @param id
+	 * @param nombre
 	 * @return boolean
 	 */
 	public static boolean comprobarNombreEspectaculo(String nombre) {
@@ -697,6 +700,7 @@ public class CircoMainClass {
 	 * Metodo para pedir datos de espectaulo
 	 * 
 	 * @param perfil
+	 * @param nombreUsuario
 	 */
 	public static void crearEspectaculo(String perfil, String nombreUsuario) {
 		String nombre;
@@ -804,8 +808,7 @@ public class CircoMainClass {
 			}
 
 			espectaculo.setIdCoord(contador);
-			escribirEspectaculo(espectaculo);
-			System.out.println("\t Espectaculo registrado con exito");
+
 		} else if (perfil.equalsIgnoreCase(Perfiles.admin.toString())) {
 			Long coordinador = 0L;
 			Map<Long, String> coordinadores = generarCoordinadores();
@@ -828,8 +831,7 @@ public class CircoMainClass {
 						espectaculo.setIdCoord(coordinador);
 						System.out.println(
 								"\t Coordinador: " + coordinadores.get(coordinador) + " añadido correctamente");
-						escribirEspectaculo(espectaculo);
-						System.out.println("\t Espectaculo registrado con exito.");
+
 						verificar = true;
 					}
 				} catch (InputMismatchException e) {
@@ -840,12 +842,44 @@ public class CircoMainClass {
 			} while (!verificar);
 
 		}
+		System.out.println();
+		System.out.println("Estos son los datos que ha introducido:");
+		System.out.println("Nombre: " + nombre);
+		System.out.println("id: " + id);
+		System.out.println("Fecha inicio: " + fechaInicio);
+		System.out.println("Fecha final: " + fechaFinal);
+		String respuesta;
+		do {
+			System.out.println(
+					"Desea continuar con el registro de espectaculo? Introduzca (s) para confirmar o (n) para cancelar el registro");
+			respuesta = leer.nextLine();
+			verificar = Herramientas.confirmarRechazar(respuesta);
+			if (!verificar) {
+				System.out.println("\t Respuesta no valida, intentelo de nuevo");
+			} else if (verificar) {
+
+				switch (respuesta) {
+
+				case "s":
+					escribirEspectaculo(espectaculo);
+					System.out.println("\t Espectaculo registrado con exito.");
+					break;
+
+				case "n":
+					System.out.println("\t Cancelado el registro del espectaculo.");
+					break;
+
+				}
+
+			}
+		} while (!verificar);
 	}
 
 	/**
 	 * Menu para crear o modificar espectaculos
 	 * 
 	 * @param perfil
+	 * @param nombreUsuario
 	 */
 	public static void crearModificarEspectaculos(String perfil, String nombreUsuario) {
 		int eleccion = 0;

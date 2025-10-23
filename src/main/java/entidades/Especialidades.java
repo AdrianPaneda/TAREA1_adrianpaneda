@@ -5,7 +5,7 @@
 package entidades;
 
 /**
- *
+ * Clase Enum Especialidades
  * @author Adrian Pañeda Hamadi
  */
 public enum Especialidades {

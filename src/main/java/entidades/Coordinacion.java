@@ -9,7 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- *
+ *Clase Coordinacion
  * @author Adrian Pañeda Hamadi
  */
 public class Coordinacion extends Persona {

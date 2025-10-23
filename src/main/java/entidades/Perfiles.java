@@ -5,7 +5,7 @@
 package entidades;
 
 /**
- *
+ * Clase Perfiles
  * @author adrip
  */
 public enum Perfiles {

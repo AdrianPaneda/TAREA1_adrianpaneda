@@ -5,7 +5,7 @@
 package entidades;
 
 /**
- *
+ * Clase Persona
  * @author Adrian Pañeda Hamadi
  */
 public abstract class Persona {

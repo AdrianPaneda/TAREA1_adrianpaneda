@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- *
+ * Clase Artista
  * @author Adrian Pañeda Hamadi
  */
 public class Artista extends Persona {

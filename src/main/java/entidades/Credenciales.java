@@ -5,7 +5,7 @@
 package entidades;
 
 /**
- *
+ *Clase credenciales
  * @author Adrian Pañeda Hamadi
  */
 public class Credenciales {
