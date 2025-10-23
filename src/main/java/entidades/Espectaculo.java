@@ -7,8 +7,9 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
- *
+ *Clase Espectaculo
  * @author Adrian Pañeda Hamadi
+ * 
  */
 public class Espectaculo implements Serializable {
     

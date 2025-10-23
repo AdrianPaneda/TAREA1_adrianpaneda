@@ -4,6 +4,9 @@
  */
 package herramientas;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -75,6 +78,23 @@ public class Herramientas {
     		return true;
     	}
     	else return false;
+    }
+    /**
+     * Metodo para verificar fecha
+     * @param fecha
+     * @return boolean
+     */
+    public static boolean verificarFecha(String fecha) {
+    	
+    	 DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+         try {
+             LocalDate.parse(fecha, formato);
+             return true; 
+         } catch (DateTimeParseException e) {
+        	 System.out.println("\t Fecha no válida, intentelo de nuevo");
+             return false;
+         }	
+ 
     }
   
 }
