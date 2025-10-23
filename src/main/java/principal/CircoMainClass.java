@@ -494,7 +494,7 @@ public class CircoMainClass {
 				} while (!verificar);
 
 			} else {
-				System.out.println("\\t Perfil no válido, intentelo de nuevo por favor");
+				System.out.println("\t Perfil no válido, intentelo de nuevo por favor");
 			}
 		} while (!perfilValido);
 		// Verificar registro
@@ -523,7 +523,7 @@ public class CircoMainClass {
 					String credencial = id + "|" + nombreUsuario + "|" + password + "|" + email + "|" + nombre + "|"
 							+ nacionalidad + "|" + perfil.toString() + "\n";
 					bw.write(credencial);
-					System.out.println("Persona registrada con exito");
+					System.out.println("\t Persona registrada con exito");
 
 				} catch (IOException e) {
 					System.out.println(e.getMessage());
@@ -531,7 +531,7 @@ public class CircoMainClass {
 			}
 
 		} else {
-			System.out.println("Registro interrumpido");
+			System.out.println("\t Registro interrumpido");
 		}
 	}
 
@@ -642,8 +642,10 @@ public class CircoMainClass {
 			Long contador = 1L;
 			while ((linea = br.readLine()) != null) {
 				datos = linea.split("\\|");
-				coordinadores.put(contador, datos[1]);
-				contador++;
+				if (datos[6].equalsIgnoreCase("coordinacion")) {
+					coordinadores.put(contador, datos[1]);
+					contador++;
+				}
 
 			}
 		} catch (FileNotFoundException e) {
@@ -804,7 +806,7 @@ public class CircoMainClass {
 			espectaculo.setIdCoord(contador);
 			escribirEspectaculo(espectaculo);
 			System.out.println("\t Espectaculo registrado con exito");
-		} else if (perfil == Perfiles.admin.toString()) {
+		} else if (perfil.equalsIgnoreCase(Perfiles.admin.toString())) {
 			Long coordinador = 0L;
 			Map<Long, String> coordinadores = generarCoordinadores();
 			verificar = false;
@@ -927,7 +929,7 @@ public class CircoMainClass {
 				new FileInputStream(PropertiesClass.obtenerPropiedad("espectaculos")))) {
 			System.out.println();
 			System.out.printf("| %-5s | %-25s | %-15s | %-15s%n", "ID", "Nombre", "Fecha Inicio", "Fecha Final");
-			System.out.println("--------------------------------------------------------------------1");
+			System.out.println("-------------------------------------------------------------------");
 			while (true) {
 
 				try {
@@ -959,7 +961,8 @@ public class CircoMainClass {
 	public static void main(String[] args) {
 
 		// registrarPersona();
-		System.out.println("\n*** 🎪 ¡BIENVENIDOS AL GRAN CIRCO! 🎪 ***");
+		System.out.println("\n*** 🎪 ¡BIENVENIDOS AL  CIRCO! 🎪 ***");
+		System.out.println();
 		int eleccion = 0;
 		String usuario;
 		String password;
@@ -968,7 +971,7 @@ public class CircoMainClass {
 		Sesion sesion = new Sesion();
 		do {
 			try {
-				System.out.println("--Perfil invitado");
+				System.out.println("--Perfil invitado--");
 				System.out.println("1-Visualizar espectaculos");
 				System.out.println("2-Log in");
 				System.out.print("Introduzca una opcion a continuacion: ");
@@ -1085,11 +1088,11 @@ public class CircoMainClass {
 										System.out.println("\t Logged out");
 										break;
 									default:
-										System.out.println("Opcion no valida,intentelo de nuevo");
+										System.out.println("\t Opcion no valida,intentelo de nuevo");
 
 									}
 								} catch (InputMismatchException e) {
-									System.out.println("Opcion no valida,intentelo de nuevo");
+									System.out.println("\t Opcion no valida,intentelo de nuevo");
 									leer.nextLine();
 								}
 							} while (eleccion != 3);
